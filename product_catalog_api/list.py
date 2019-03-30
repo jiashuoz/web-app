@@ -1,7 +1,7 @@
 import json
 import os
 
-from product_catalog import decimalencoder
+from product_catalog_api import decimalencoder
 import boto3
 dynamodb = boto3.resource('dynamodb')
 

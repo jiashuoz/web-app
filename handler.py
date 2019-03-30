@@ -8,13 +8,13 @@ def hello(event, context):
         "input": event
     }
 
-    if ('queryStringParameters' in event and 'name' in event['queryStringParameters']):
-        body["message"] = "hello, " + event['queryStringParameters']['name'] + ", nice to meet you!"
-        response = {
-            "statusCode": 200,
-            "body": json.dumps(body)
-        }
-        return response
+    # if ('queryStringParameters' in event and 'name' in event['queryStringParameters']):
+    #     body["message"] = "hello, " + event['queryStringParameters']['name'] + ", nice to meet you!"
+    #     response = {
+    #         "statusCode": 200,
+    #         "body": json.dumps(body)
+    #     }
+    #     return response
 
     # if event['httpMethod'] == 'POST' and event['body'] != None:
     #     jsonObject = json.loads(event['body'])

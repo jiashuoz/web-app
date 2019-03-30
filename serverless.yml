@@ -97,6 +97,20 @@ functions:
           path: product_catalog-list
           method: get
           cors: true
+  delete:
+    handler: product_catalog_api/delete.delete
+    events:
+      - http:
+          path: product_catalog-delete/{id}
+          method: delete
+          cors: true
+  update:
+    handler: product_catalog_api/update.update
+    events:
+      - http:
+          path: product_catalog-update/{id}
+          method: put
+          cors: true
 
   register:
     handler: photographer_api/register.register
