@@ -84,14 +84,14 @@ functions:
     handler: product_catalog/create.create
     events:
       - http:
-          path: product_catalog
+          path: product_catalog-create
           method: post
           cors: true
   list:
     handler: product_catalog/list.list
     events:
       - http:
-          path: product_catalog
+          path: product_catalog-list
           method: get
           cors: true
 
@@ -142,10 +142,11 @@ functions:
 #       Value: "Some output value"
 resources:
   Resources:
-    TodosDynamoDbTable:
+    ProductDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'
       DeletionPolicy: Retain
       Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
         AttributeDefinitions:
           -
             AttributeName: id
@@ -157,4 +158,4 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        
