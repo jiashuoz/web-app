@@ -8,23 +8,21 @@ import boto3
 dynamodb = boto3.resource('dynamodb')
 
 
-def create(event, context):
+def register(event, context):
     data = json.loads(event['body'])
-    if 'id' not in data:
+    if 'email' not in data:
         logging.error("Validation Failed")
         raise Exception("Couldn't create the product item.")
         return
 
     timestamp = int(time.time() * 1000)
 
-    table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
+    table = dynamodb.Table(os.environ['PHOTOGRAPHER_TABLE'])
 
     item = {
-        'id': data['id'],
-        'text': data['description'],
-        'price': data['price'],
-        'createdAt': timestamp,
-        'updatedAt': timestamp,
+        'email': data['email'],
+        'password': data['password'],
+        'name': data['name']
     }
 
     # write the todo to the dynamo database

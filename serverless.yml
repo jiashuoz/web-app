@@ -26,6 +26,7 @@ provider:
   region: us-east-2
   environment:
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-product_catalog
+    PHOTOGRAPHER_TABLE: ${self:service}-${opt:stage, self:provider.stage}-photographers
     
   iamRoleStatements:
     - Effect: "Allow"
@@ -36,8 +37,10 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
-# you can add statements to the Lambda function's IAM Role here
+      Resource:
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.PHOTOGRAPHER_TABLE}"
+      # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
 #    - Effect: "Allow"
 #      Action:
@@ -81,18 +84,26 @@ functions:
           method: POST
           cors: true
   create:
-    handler: product_catalog/create.create
+    handler: product_catalog_api/create.create
     events:
       - http:
           path: product_catalog-create
           method: post
           cors: true
   list:
-    handler: product_catalog/list.list
+    handler: product_catalog_api/list.list
     events:
       - http:
           path: product_catalog-list
           method: get
+          cors: true
+
+  register:
+    handler: photographer_api/register.register
+    events:
+      - http:
+          path: photographer_api-register
+          method: post
           cors: true
 
 #    The following are a few example events you can configure
@@ -154,6 +165,23 @@ resources:
         KeySchema:
           -
             AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    PhotographerDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:provider.environment.PHOTOGRAPHER_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: email
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: email
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
