@@ -15,6 +15,8 @@ def create(event, context):
         raise Exception("Couldn't create the product item.")
         return
 
+    photographer_email = 'None' if 'photographer' not in data else data['photographer']
+
     timestamp = int(time.time() * 1000)
 
     table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
@@ -25,6 +27,7 @@ def create(event, context):
         'price': data['price'],
         'createdAt': timestamp,
         'updatedAt': timestamp,
+        'photographer': photographer_email
     }
 
     # write the todo to the dynamo database

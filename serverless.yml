@@ -37,10 +37,12 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
+        - ses:SendEmail
       Resource:
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.PHOTOGRAPHER_TABLE}"
-      # you can add statements to the Lambda function's IAM Role here
+        - "arn:aws:ses:us-east-1:287819213717*"
+        # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
 #    - Effect: "Allow"
 #      Action:
@@ -75,13 +77,13 @@ functions:
     events:
        - http:
           path: first-endpoint
-          method: GET
+          method: get
   hellopost:
     handler: handler2.hellopost
     events:
        - http:
           path: second-endpoint
-          method: POST
+          method: post
           cors: true
   create:
     handler: product_catalog_api/create.create
@@ -119,7 +121,10 @@ functions:
           path: photographer_api-register
           method: post
           cors: true
-
+  photo_request:
+    handler: photo_request.request
+    events:
+      - stream: arn:aws:dynamodb:us-east-2:287819213717:table/web-app-dev-product_catalog/stream/2019-03-31T18:08:59.310
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -183,6 +188,9 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        # add stream to dynamo table
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
 
     PhotographerDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'
@@ -200,4 +208,3 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        
