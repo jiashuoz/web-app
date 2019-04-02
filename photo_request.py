@@ -23,23 +23,17 @@ SENDER = "retail web <jiashuoz@outlook.com>"
 AWS_REGION = "us-east-1"
 
 # The subject line for the email.
-SUBJECT = "Amazon SES Test (SDK for Python)"
+SUBJECT = "Request for a photo for new products"
 
 # The email body for recipients with non-HTML email clients.
-BODY_TEXT = ("Amazon SES Test (Python)\r\n"
-             "This email was sent with Amazon SES using the "
-             "AWS SDK for Python (Boto)."
-            )
+BODY_TEXT = ("Request for a photo for new products\r\n")
             
 # The HTML body of the email.
 BODY_HTML = """<html>
 <head></head>
 <body>
-  <h1>Amazon SES Test (SDK for Python)</h1>
-  <p>This email was sent with
-    <a href='https://aws.amazon.com/ses/'>Amazon SES</a> using the
-    <a href='https://aws.amazon.com/sdk-for-python/'>
-      AWS SDK for Python (Boto)</a>.</p>
+  <h1>Request for a photo for new products</h1>
+  <p></p>
 </body>
 </html>
             """
@@ -58,7 +52,7 @@ def request(event, context):
             dynamoDB = record['dynamodb']
             if dynamoDB['NewImage']['photographer']['S'] != 'None':
                 print(dynamoDB['NewImage']['photographer']['S'])
-                RECIPIENT = dynamoDB['NewImage']['photographer']['S']
+                RECIPIENT = dynamoDB['NewImage']['id']['S']
                 # Try to send the email.
                 try:
                     #Provide the contents of the email.

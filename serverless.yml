@@ -27,6 +27,8 @@ provider:
   environment:
     DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}-product_catalog
     PHOTOGRAPHER_TABLE: ${self:service}-${opt:stage, self:provider.stage}-photographers
+    CREDITCARD_TABLE: ${self:service}-${opt:stage, self:provider.stage}-creditcards
+    TRANSACTION_TABLE: ${self:service}-${opt:stage, self:provider.stage}-transactions
     
   iamRoleStatements:
     - Effect: "Allow"
@@ -41,6 +43,8 @@ provider:
       Resource:
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.PHOTOGRAPHER_TABLE}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CREDITCARD_TABLE}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.TRANSACTION_TABLE}"
         - "arn:aws:ses:us-east-1:287819213717*"
         # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -125,7 +129,14 @@ functions:
     handler: photo_request.request
     events:
       - stream: arn:aws:dynamodb:us-east-2:287819213717:table/web-app-dev-product_catalog/stream/2019-03-31T18:08:59.310
-#    The following are a few example events you can configure
+  purchase:
+    handler: purchase_api/purchase.purchase
+    events:
+      - http:
+          path: purchase_api-purchase
+          method: post
+          cors: true
+      #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
 #    events:
@@ -204,6 +215,40 @@ resources:
         KeySchema:
           -
             AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    CreditCardDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:provider.environment.CREDITCARD_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: credit_card_id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: credit_card_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    
+    TransactionDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:provider.environment.TRANSACTION_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: order_id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: order_id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
