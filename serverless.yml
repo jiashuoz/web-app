@@ -29,7 +29,8 @@ provider:
     PHOTOGRAPHER_TABLE: ${self:service}-${opt:stage, self:provider.stage}-photographers
     CREDITCARD_TABLE: ${self:service}-${opt:stage, self:provider.stage}-creditcards
     TRANSACTION_TABLE: ${self:service}-${opt:stage, self:provider.stage}-transactions
-    
+    # S3_PRODUCT_PHOTOS: ${self:service}-${opt:stage, self:provider.stage}-s3-photos
+    # S3_PRODUCT_PHOTOS_RESIZED: ${self:service}-${opt:stage, self:provider.stage}-s3-photos-resized
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -40,7 +41,9 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
         - ses:SendEmail
+        - "s3:*"
       Resource:
+        - "*"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.PHOTOGRAPHER_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CREDITCARD_TABLE}"
@@ -136,6 +139,22 @@ functions:
           path: purchase_api-purchase
           method: post
           cors: true
+  
+  resize:
+    handler: photo_resize.resize
+    events:
+      - s3:
+          bucket: web-app-jiashuoz-product-photos
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .jpg
+    # events:
+    #   - s3:
+    #       ### indentation is important
+    #       bucket: test-s3-bucket-jiashuoz
+    #       event: s3:ObjectCreated:*
+    #       rules:
+    #         - suffix: .jpg
       #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -253,3 +272,72 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    S3BucketProductPhotosResized:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: web-app-jiashuoz-product-photosresized
+        # Set the CORS policy
+        CorsConfiguration:
+          CorsRules:
+            -
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+    # S3BucketProductPhotos:
+    #   Type: 'AWS::S3::Bucket'
+    #   Properties:
+    #     BucketName: ${self:provider.environment.S3_PRODUCT_PHOTOS}
+    #     # Set the CORS policy
+    #     CorsConfiguration:
+    #       CorsRules:
+    #         -
+    #           AllowedOrigins:
+    #             - '*'
+    #           AllowedHeaders:
+    #             - '*'
+    #           AllowedMethods:
+    #             - GET
+    #             - PUT
+    #             - POST
+    #             - DELETE
+    #             - HEAD
+    #           MaxAge: 3000
+    # S3BucketProductPhotosResized:
+    #   Type: 'AWS::S3::Bucket'
+    #   Properties:
+    #     BucketName: ${self:provider.environment.S3_PRODUCT_PHOTOS_RESIZED}
+    #     # Set the CORS policy
+    #     CorsConfiguration:
+    #       CorsRules:
+    #         -
+    #           AllowedOrigins:
+    #             - '*'
+    #           AllowedHeaders:
+    #             - '*'
+    #           AllowedMethods:
+    #             - GET
+    #             - PUT
+    #             - POST
+    #             - DELETE
+    #             - HEAD
+    #           MaxAge: 3000
+#      Properties:
+#        BucketName: my-new-bucket
+#  Outputs:
+#     NewOutput:
+#       Description: "Description for the output"
+#       Value: "Some output value"
+
+plugins:
+  - serverless-python-requirements
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux

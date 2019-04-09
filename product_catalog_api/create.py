@@ -10,7 +10,7 @@ dynamodb = boto3.resource('dynamodb')
 
 def create(event, context):
     data = json.loads(event['body'])
-    if 'id' not in data:
+    if 'id' not in data or 'photographer' not in data:
         logging.error("Validation Failed")
         raise Exception("Couldn't create the product item.")
         return

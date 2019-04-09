@@ -4,7 +4,10 @@ import logging
 import os
 
 import boto3
+from botocore.vendored import requests
 from botocore.exceptions import ClientError
+
+s3 = boto3.client('s3')
 
 # Replace sender@example.com with your "From" address.
 # This address must be verified with Amazon SES.
@@ -27,7 +30,7 @@ SUBJECT = "Request for a photo for new products"
 
 # The email body for recipients with non-HTML email clients.
 BODY_TEXT = ("Request for a photo for new products\r\n")
-            
+
 # The HTML body of the email.
 BODY_HTML = """<html>
 <head></head>
@@ -52,9 +55,18 @@ def request(event, context):
             dynamoDB = record['dynamodb']
             if dynamoDB['NewImage']['photographer']['S'] != 'None':
                 print(dynamoDB['NewImage']['photographer']['S'])
-                RECIPIENT = dynamoDB['NewImage']['id']['S']
+                RECIPIENT = dynamoDB['NewImage']['photographer']['S']
                 # Try to send the email.
                 try:
+                    key = "car.txt"
+                    post = s3.generate_presigned_post(Bucket='web-app-dev-s3-product-photos', Key = key)
+                    
+                    print(str(s3.list_buckets()))
+                    
+                    BODY_TEXT = str(post) + "\n"
+                    files = {"car.txt": "car.txt"}
+                    response = requests.post(post["url"], data=post["fields"], files=files)
+                    print("response: " + str(response))
                     #Provide the contents of the email.
                     response = client.send_email(
                         Destination={
@@ -66,7 +78,7 @@ def request(event, context):
                             'Body': {
                                 'Html': {
                                     'Charset': CHARSET,
-                                    'Data': BODY_HTML,
+                                    'Data': BODY_TEXT,
                                 },
                                 'Text': {
                                     'Charset': CHARSET,
@@ -89,3 +101,4 @@ def request(event, context):
                 else:
                     print("Email sent! Message ID: " + response['MessageId'])
     print(event)
+    return "photo_request function executed successfully"
