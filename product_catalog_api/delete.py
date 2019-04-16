@@ -6,6 +6,7 @@ dynamodb = boto3.resource('dynamodb')
 
 
 def delete(event, context):
+    print(event)
     table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
 
     # delete the product from the database
