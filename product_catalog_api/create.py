@@ -19,8 +19,9 @@ def create(event, context):
 
     photographer_email = 'None' if 'photographer' not in data else data['photographer']
 
-    db_start = time.time()
+    db_init_start = time.time()
     table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
+    db_init_end = time.time()
 
     item = {
         'id': data['id'],
@@ -30,11 +31,13 @@ def create(event, context):
     }
 
     # write the todo to the dynamo database
+    db_put_start = time.time()
     table.put_item(Item=item)
-    db_end = time.time()
+    db_put_end = time.time()
 
     run_time = {
-        "db_time": db_end - db_start,
+        "db_init_time": db_init_end - db_init_start,
+        "db_put_time": db_put_end - db_put_start,
         "lambda_time": time.time() - lambda_start
     }
     # create a response
