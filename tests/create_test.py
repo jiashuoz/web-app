@@ -103,7 +103,7 @@ def main():
     # Setup a list of processes that we want to run
     # sequential_test_list()
     # interval_test_create(1, 10)
-    interval_test_create(0, 200)
+    interval_test_create(920, 5)
     
 
 

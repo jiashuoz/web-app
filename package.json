@@ -1,0 +1,25 @@
+{
+  "name": "web-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jiashuoz/web-app.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jiashuoz/web-app/issues"
+  },
+  "homepage": "https://github.com/jiashuoz/web-app#readme",
+  "dependencies": {
+    "serverless-python-requirements": "^4.3.0"
+  }
+}
